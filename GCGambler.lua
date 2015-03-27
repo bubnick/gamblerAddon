@@ -2,9 +2,9 @@
 -- (Perhaps) Fixed for Warlords of Draenor (Patch 6.0.2)
 -- (Perhaps) Cleaned up codebase
 -- (Perhaps) Added in the ability to start and stop rolls via chat
+-- (TODO) Add in ability to remotely start and stop rolls via whisper or a global channel
 -- (TODO) Change reset button to roll type button
 -- (TODO) Add in suicide rolls
--- (TODO) Add in ability to remotely start and stop rolls via whisper or a global channel
 
 
 -- Version 5.4.7
@@ -362,7 +362,7 @@ function GCGambler_OnClickLASTCALL()
 	GCGambler_ROLL_Button:Enable();
 end
 
-function GCGambler_OnClickACCEPTONES() 
+function GCGambler_OnClickACCEPTONES()
 	if GCGambler_EditBox:GetText() ~= "" and GCGambler_EditBox:GetText() ~= "1" then
 		GCGambler_Reset();
 		GCGambler_ROLL_Button:Disable();
@@ -750,6 +750,10 @@ function GCGambler_SlashCmd(msg)
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00acceptones - Starts a roll between 1 and the set amount");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00lastcall - Send out a last call for the current roll");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00roll - Ends the opt in phase for rolling, equivalent to clicking ROLL button");
+		--Whisper commands - Start and stop rolls from whispers received
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgstartroll <Max Roll>- Starts a roll between 1 and the whispered amount");
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcglastcall - Send out a last call for the current roll");
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgendroll - Ends the opt in phase for rolling, equivalent to clicking ROLL button");
 		msgPrint = 1;
 	end
 	if (msg == "hide") then
@@ -812,6 +816,30 @@ function GCGambler_SlashCmd(msg)
 		msgPrint = 1;
 	end
 	--End Command Line Checks
+	--Start Whisper Checks
+	if(string.sub(msg, 1, 12) == "gcgstartroll") then
+		--Get player who sent message
+		rollAmount = string.sub(msg, 13, string.len(msg));
+		--Start roll if it is a valid amount to roll to
+		if rollAmount ~= "" and rollAmount ~= "1" and rollAmount ~="0" then
+			GCGambler_EditBox:SetText(rollAmount);
+			GCGambler_OnClickACCEPTONES();
+		--Otherwise let the player know they input an invalid roll
+		else
+			--SendChatMessage("Invalid roll, please use the format gcgstartroll <Roll Amount>. Roll must be > 1", chatmethod, GetDefaultLanguage("player"));
+		end
+		msgPrint = 1;
+	end
+	--TODO: Add some method of error checking to make sure roll has started before doing these two.
+	if(msg == "gcglastcall") then
+		GCGambler_OnClickLASTCALL();
+		msgPrint = 1;
+	end
+	if(msg == "gcgendroll") then
+		GCGambler_OnClickROLL();
+		msgPrint = 1;
+	end
+	--End Whisper Checks
 	if(msgPrint == 0) then
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Invalid argument for command /gcg");
 	end
