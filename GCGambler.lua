@@ -65,6 +65,7 @@ local whispermethod = false;
 local totalentries = 0;
 local highplayername = "";
 local lowplayername = "";
+local allowWhispers = false;
 
 -- LOAD FUNCTION --
 function GCGambler_OnLoad(this)
@@ -75,7 +76,9 @@ function GCGambler_OnLoad(this)
 	this:RegisterEvent("CHAT_MSG_PARTY");
 	this:RegisterEvent("CHAT_MSG_PARTY_LEADER");
 	this:RegisterEvent("CHAT_MSG_SYSTEM");
+	this:RegisterEvent("CHAT_MSG_WHISPER");
 	this:RegisterEvent("PLAYER_ENTERING_WORLD");
+	
 	this:RegisterForDrag("LeftButton");
 
 	GCGambler_ROLL_Button:Disable();
@@ -197,7 +200,11 @@ function GCGambler_OnEvent(self, event, ...)
 	if (event == "CHAT_MSG_SYSTEM" and AcceptRolls=="true") then
 		local temp1 = tostring(arg1);
 		GCGambler_ParseRoll(temp1);		
-	end	
+	end
+
+	if (event == "CHAT_MSG_WHISPER" and allowWhispers == true) then
+		GCGambler_Whisper_Commands(arg1);
+	end
 end
 
 
@@ -732,6 +739,43 @@ function GCGambler_EditBox_OnLoad()
 	GCGambler_EditBox:SetAutoFocus(false);
 end
 
+function GCGambler_Whisper_Commands(msg)
+	local msg = msg:lower()
+	DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: " .. msg);
+	--Start Whisper Checks
+	if(string.sub(msg, 1, 12) == "gcgstartroll") then
+		--Get player who sent message
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: gcgstartroll command recognized");
+		local rollAmount = string.sub(msg, 13, string.len(msg));
+		-- We want to parse the roll to a number if it is so.
+		if tonumber(rollAmount) ~= nil then
+			rollAmount = tonumber(rollAmount);
+		else
+			rollAmount = "";
+		end
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount =" .. rollAmount);
+		--Start roll if it is a valid amount to roll to
+		if rollAmount ~= "" and rollAmount ~= "1" and rollAmount ~="0" then
+			DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount fired");
+			GCGambler_EditBox:SetText(rollAmount);
+			GCGambler_OnClickACCEPTONES();
+		--Otherwise let the player know they input an invalid roll
+		else
+			--SendChatMessage("Invalid roll, please use the format gcgstartroll <Roll Amount>. Roll must be > 1", "WHISPER", nil, );
+			DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount invalid");
+		end
+	end
+	--TODO: Add some method of error checking to make sure roll has started before doing these two.
+	-- Gross way would be to check if text of button says new game.
+	if(msg == "gcglastcall") then
+		GCGambler_OnClickLASTCALL();
+	end
+	if(msg == "gcgendroll") then
+		GCGambler_OnClickROLL();
+	end
+	--End Whisper Checks
+end
+
 function GCGambler_SlashCmd(msg)
 	local msg = msg:lower();
 	local msgPrint = 0;
@@ -750,6 +794,8 @@ function GCGambler_SlashCmd(msg)
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00acceptones - Starts a roll between 1 and the set amount");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00lastcall - Send out a last call for the current roll");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00roll - Ends the opt in phase for rolling, equivalent to clicking ROLL button");
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00startremote - Enables GCG to receive commands via whisper");
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00stopremote - Disables GCG to receive commands via whisper");
 		--Whisper commands - Start and stop rolls from whispers received
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgstartroll <Max Roll>- Starts a roll between 1 and the whispered amount");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcglastcall - Send out a last call for the current roll");
@@ -815,31 +861,17 @@ function GCGambler_SlashCmd(msg)
 		GCGambler_OnClickROLL();
 		msgPrint = 1;
 	end
+	if(msg == "startremote") then
+		allowWhispers = true;
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00GCG Remote commands enabled.");
+		msgPrint = 1;
+	end
+	if(msg == "stopremote") then
+		allowWhispers = false;
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00GCG Remote commands disabled.");
+		msgPrint = 1;
+	end	
 	--End Command Line Checks
-	--Start Whisper Checks
-	if(string.sub(msg, 1, 12) == "gcgstartroll") then
-		--Get player who sent message
-		rollAmount = string.sub(msg, 13, string.len(msg));
-		--Start roll if it is a valid amount to roll to
-		if rollAmount ~= "" and rollAmount ~= "1" and rollAmount ~="0" then
-			GCGambler_EditBox:SetText(rollAmount);
-			GCGambler_OnClickACCEPTONES();
-		--Otherwise let the player know they input an invalid roll
-		else
-			--SendChatMessage("Invalid roll, please use the format gcgstartroll <Roll Amount>. Roll must be > 1", chatmethod, GetDefaultLanguage("player"));
-		end
-		msgPrint = 1;
-	end
-	--TODO: Add some method of error checking to make sure roll has started before doing these two.
-	if(msg == "gcglastcall") then
-		GCGambler_OnClickLASTCALL();
-		msgPrint = 1;
-	end
-	if(msg == "gcgendroll") then
-		GCGambler_OnClickROLL();
-		msgPrint = 1;
-	end
-	--End Whisper Checks
 	if(msgPrint == 0) then
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Invalid argument for command /gcg");
 	end
