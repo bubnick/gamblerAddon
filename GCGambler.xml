@@ -1,0 +1,212 @@
+﻿<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="GCGambler.lua" />
+	<Animation />
+	<Frame name="GCGambler_Frame" parent="UIParent" toplevel="true" movable="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="320" y="150" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="UIParent" />
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+		</Backdrop>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="Welcome to the Gentlemens Club Gambler!" inherits="GameFontNormal" text="Welcome to the Gentlemens Club Gambler!">
+					<Size x="298" y="19" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="11" y="-15" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="version" inherits="GameFontNormal" text="|cffff3f3f(6.0.2 version)">
+					<Size x="299" y="18" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="10" y="-32" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString inherits="GameFontNormalSmall" text="Perhaps @ Icecrown">
+					<Size x="122" y="13" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="98" y="-129" />
+						</Anchor>
+					</Anchors>
+					<FontHeight val="6" />
+					<Color r="0.753" g="0.753" b="0.753" />
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="GCGambler_Close" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="GCGambler_Frame" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="7" y="6"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="GCGambler_ROLL_Button" inherits="OptionsButtonTemplate" movable="true" text="ROLL!">
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset x="-105" y="12" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickROLL();
+
+						GCGambler_ROLL_Button_OnClick()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GCGambler_STATS_Button" inherits="OptionsButtonTemplate" movable="true" text="Stats">
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset x="105" y="10" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickSTATS();
+
+						GCGambler_STATS_Button_OnClick()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<EditBox name="GCGambler_EditBox" letters="6">
+				<Size>
+					<AbsDimension x="100" y="38" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="2" y="-81" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="Texture2" file="Interface\ChatFrame\UI-ChatInputBorder-Right">
+							<Size>
+								<AbsDimension x="75" y="32" />
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset x="9" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.7" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="Texture1" file="Interface\ChatFrame\UI-ChatInputBorder-Left">
+							<Size>
+								<AbsDimension x="75" y="32" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset x="-14" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.2" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						GCGambler_EditBox_OnLoad();
+					</OnLoad>
+					<OnEscapePressed>
+						self:ClearFocus();
+					</OnEscapePressed>
+					<OnTextChanged>
+						GCGambler_EditBox_OnTextChanged()
+					</OnTextChanged>
+				</Scripts>
+				<FontString inherits="ChatFontNormal" />
+			</EditBox>
+			<Button name="GCGambler_RESET_Button" inherits="OptionsButtonTemplate" movable="true" text="Reset">
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativeTo="GCGambler_STATS_Button" relativePoint="TOPRIGHT">
+						<Offset y="8" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickRESET();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GCGambler_LASTCALL_Button" inherits="OptionsButtonTemplate" movable="true" text="Last Call">
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset x="-105" y="39" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickLASTCALL();
+
+						GCGambler_LASTCALL_Button_OnClick()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GCGambler_AcceptOnes_Button" inherits="OptionsButtonTemplate" text="Open Entry">
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset x="-105" y="66" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickACCEPTONES();
+
+						GCGambler_AcceptOnes_Button_OnClick()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GCGambler_CHAT_Button" inherits="OptionsButtonTemplate" text="(Party)">
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="105" y="-63" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GCGambler_OnClickCHAT();
+
+						GCGambler_CHAT_Button_OnClick()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				GCGambler_OnLoad(self);
+
+				GCGambler_Frame_OnLoad()
+			</OnLoad>
+			<OnEvent>
+				GCGambler_OnEvent(self, event, ...);
+			</OnEvent>
+			<OnDragStart>
+				self:StartMoving();
+				self.isMoving = true;
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing();
+				self.isMoving = false;
+			</OnDragStop>
+		</Scripts>
+	</Frame>
+</Ui>

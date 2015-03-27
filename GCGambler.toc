@@ -1,0 +1,10 @@
+## Interface: 50300
+## Title: GCGambler
+## Author:(Original) Myrx, Triumvirate; (Revisions) Perhaps, subrand0m, Chaos, Karatebear, Dilios
+## Version: 6.0
+## Notes: Revision of a Classic
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: GCGambler
+
+GCGambler.xml
