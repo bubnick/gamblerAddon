@@ -2,7 +2,8 @@
 -- (Perhaps) Fixed for Warlords of Draenor (Patch 6.0.2)
 -- (Perhaps) Cleaned up codebase
 -- (Perhaps) Added in the ability to start and stop rolls via chat
--- (TODO) Add in ability to remotely start and stop rolls via whisper or a global channel
+-- (Perhaps) Added in ability to remotely start and stop rolls via whisper
+-- (TODO) Look at possibility of remotely starting and stopping rolls via global channel
 -- (TODO) Change reset button to roll type button
 -- (TODO) Add in suicide rolls
 
@@ -66,6 +67,7 @@ local totalentries = 0;
 local highplayername = "";
 local lowplayername = "";
 local allowWhispers = false;
+local ones = false;
 
 -- LOAD FUNCTION --
 function GCGambler_OnLoad(this)
@@ -203,7 +205,7 @@ function GCGambler_OnEvent(self, event, ...)
 	end
 
 	if (event == "CHAT_MSG_WHISPER" and allowWhispers == true) then
-		GCGambler_Whisper_Commands(arg1);
+		GCGambler_Whisper_Commands(arg1, arg2);
 	end
 end
 
@@ -739,39 +741,49 @@ function GCGambler_EditBox_OnLoad()
 	GCGambler_EditBox:SetAutoFocus(false);
 end
 
-function GCGambler_Whisper_Commands(msg)
+function GCGambler_Whisper_Commands(msg, whispTar)
 	local msg = msg:lower()
-	DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: " .. msg);
+	local err;
 	--Start Whisper Checks
-	if(string.sub(msg, 1, 12) == "gcgstartroll") then
-		--Get player who sent message
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: gcgstartroll command recognized");
+	if(string.sub(msg, 1, 12) == "gcgstartroll") and ones == false and GCGambler_AcceptOnes_Button:GetText() ~= "New Game" then
 		local rollAmount = string.sub(msg, 13, string.len(msg));
 		-- We want to parse the roll to a number if it is so.
 		if tonumber(rollAmount) ~= nil then
 			rollAmount = tonumber(rollAmount);
 		else
+			err = rollAmount;
 			rollAmount = "";
 		end
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount =" .. rollAmount);
 		--Start roll if it is a valid amount to roll to
 		if rollAmount ~= "" and rollAmount ~= "1" and rollAmount ~="0" then
-			DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount fired");
 			GCGambler_EditBox:SetText(rollAmount);
 			GCGambler_OnClickACCEPTONES();
 		--Otherwise let the player know they input an invalid roll
 		else
-			--SendChatMessage("Invalid roll, please use the format gcgstartroll <Roll Amount>. Roll must be > 1", "WHISPER", nil, );
-			DEFAULT_CHAT_FRAME:AddMessage("|cffffff00DEBUG: rollAmount invalid");
+			SendChatMessage(format("%s%s%s","Invalid roll amount, ", err, ". Please use gcgstartroll <roll amount>"), "WHISPER", GetDefaultLanguage("player"), whispTar);
 		end
+	elseif(string.sub(msg, 1, 12) == "gcgstartroll") and (ones == true or GCGambler_AcceptOnes_Button:GetText() == "New Game") then
+		SendChatMessage("Please wait for the current game to end.", "WHISPER", GetDefaultLanguage("player"), whispTar);
 	end
 	--TODO: Add some method of error checking to make sure roll has started before doing these two.
-	-- Gross way would be to check if text of button says new game.
+		
+	GCGambler_LASTCALL_Button:Disable();
 	if(msg == "gcglastcall") then
+		if GCGambler_AcceptOnes_Button:GetText() == "New Game" then
 		GCGambler_OnClickLASTCALL();
+		ones = true;
+		else
+			SendChatMessage("Please start a new game before doing last call.", "WHISPER", GetDefaultLanguage("player"), whispTar);
+			ones = false;
+		end
 	end
 	if(msg == "gcgendroll") then
-		GCGambler_OnClickROLL();
+		if GCGambler_AcceptOnes_Button:GetText() == "New Game" and ones == true then
+			GCGambler_OnClickROLL();
+			ones = false;
+		else
+			SendChatMessage("Please ensure a game has been started, and last call has been done before ending roll.", "WHISPER", GetDefaultLanguage("player"), whispTar);
+		end
 	end
 	--End Whisper Checks
 end
@@ -797,9 +809,9 @@ function GCGambler_SlashCmd(msg)
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00startremote - Enables GCG to receive commands via whisper");
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00stopremote - Disables GCG to receive commands via whisper");
 		--Whisper commands - Start and stop rolls from whispers received
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgstartroll <Max Roll>- Starts a roll between 1 and the whispered amount");
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcglastcall - Send out a last call for the current roll");
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgendroll - Ends the opt in phase for rolling, equivalent to clicking ROLL button");
+		--DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgstartroll <Max Roll>- Starts a roll between 1 and the whispered amount");
+		--DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcglastcall - Send out a last call for the current roll");
+		--DEFAULT_CHAT_FRAME:AddMessage("|cffffff00WHISPER - gcgendroll - Ends the opt in phase for rolling, equivalent to clicking ROLL button");
 		msgPrint = 1;
 	end
 	if (msg == "hide") then
@@ -864,11 +876,15 @@ function GCGambler_SlashCmd(msg)
 	if(msg == "startremote") then
 		allowWhispers = true;
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00GCG Remote commands enabled.");
+		SendChatMessage("Remote roll commands enabled!",chatmethod,GetDefaultLanguage("player"));
+		SendChatMessage("Whisper gcgstartroll <roll amount> to start roll, gcglastcall for last call, and gcgendroll to end roll.",chatmethod,GetDefaultLanguage("player"));
+
 		msgPrint = 1;
 	end
 	if(msg == "stopremote") then
 		allowWhispers = false;
 		DEFAULT_CHAT_FRAME:AddMessage("|cffffff00GCG Remote commands disabled.");
+		SendChatMessage("Remote roll commands disabled!",chatmethod,GetDefaultLanguage("player"));
 		msgPrint = 1;
 	end	
 	--End Command Line Checks
