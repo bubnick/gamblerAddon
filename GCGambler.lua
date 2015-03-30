@@ -2,8 +2,7 @@
 -- (Perhaps) Fixed for Warlords of Draenor (Patch 6.0.2)
 -- (Perhaps) Cleaned up codebase
 -- (Perhaps) Added in the ability to start and stop rolls via chat
--- (Perhaps) Added in ability to remotely start and stop rolls via whisper
--- (TODO) Look at possibility of remotely starting and stopping rolls via global channel
+-- (TODO) Add in ability to remotely start and stop rolls via whisper or a global channel
 -- (TODO) Change reset button to roll type button
 -- (TODO) Add in suicide rolls
 
@@ -767,9 +766,8 @@ function GCGambler_Whisper_Commands(msg, whispTar)
 	end
 	--TODO: Add some method of error checking to make sure roll has started before doing these two.
 		
-	GCGambler_LASTCALL_Button:Disable();
 	if(msg == "gcglastcall") then
-		if GCGambler_AcceptOnes_Button:GetText() == "New Game" then
+		if GCGambler_AcceptOnes_Button:GetText() ~= "New Game" then
 		GCGambler_OnClickLASTCALL();
 		ones = true;
 		else
@@ -778,7 +776,7 @@ function GCGambler_Whisper_Commands(msg, whispTar)
 		end
 	end
 	if(msg == "gcgendroll") then
-		if GCGambler_AcceptOnes_Button:GetText() == "New Game" and ones == true then
+		if GCGambler_AcceptOnes_Button:GetText() ~= "New Game" and ones == true then
 			GCGambler_OnClickROLL();
 			ones = false;
 		else
