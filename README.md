@@ -12,9 +12,9 @@ Version 6.0.2
 
     (Perhaps) Fixed for Warlords of Draenor (Patch 6.0.2)
     (Perhaps) Cleaned up codebase
-    (Perhaps) Various bugfixes (possibly created from WoD release)
     (Perhaps) Added in the ability to start and stop rolls via chat
-    (TODO) Add in ability to remotely start and stop rolls via whisper or a global channel
+    (Perhaps) Added in ability to remotely start and stop rolls via whisper
+    (TODO) Add in ability to remotely start at stop rolls via a global channel
     (TODO) Change reset button to roll type button
     (TODO) Add in suicide rolls
 
